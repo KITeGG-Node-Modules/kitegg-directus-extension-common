@@ -1,6 +1,6 @@
 import { getKeycloakClient } from './get-keycloak-client.js'
 
-function baseRequestHandler (requestFunction, context) {
+function baseRequestHandler (requestFunction, context, allowGroups = [], propWhitelist = []) {
   const {services} = context
   return async function (req, res, next) {
     if (!req.accountability?.user) {
@@ -23,12 +23,13 @@ function baseRequestHandler (requestFunction, context) {
         if (user?.external_identifier) {
           console.log('Keycloak: Fetch external user id', user.external_identifier);
           ({data: userGroups} = await client.get(`/users/${user?.external_identifier}/groups`))
-          isAllowed = !!userGroups.find(group => ['staff', 'management'].includes(group.name))
+          isAllowed = !allowGroups.length || !!userGroups.find(group => allowGroups.includes(group.name))
           if (!isAllowed && user.external_identifier === req.params.id) {
-            const propWhitelist = ['firstName', 'lastName', 'email']
-            if (req.data) {
-              for (const key in req.data) {
-                if (!propWhitelist.includes(key)) delete req.data[key]
+            if (propWhitelist.length) {
+              if (req.data) {
+                for (const key in req.data) {
+                  if (!propWhitelist.includes(key)) delete req.data[key]
+                }
               }
             }
             isAllowed = true
