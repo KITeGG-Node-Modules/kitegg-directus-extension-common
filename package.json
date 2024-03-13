@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@kubernetes/client-node": "^0.20.0",
     "axios": "^1.6.7",
     "querystring": "^0.2.1"
   }
