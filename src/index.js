@@ -1,7 +1,7 @@
-import { baseRequestHandler } from './base-request-handler'
-import { getKeycloakClient } from './get-keycloak-client'
-import { getKubernetesClient } from './get-kubernetes-client'
-import { handleErrorResponse } from './handle-error-response'
+import { baseRequestHandler } from './base-request-handler.js'
+import { getKeycloakClient } from './get-keycloak-client.js'
+import { getKubernetesClient } from './get-kubernetes-client.js'
+import { handleErrorResponse } from './handle-error-response.js'
 
 export {
   baseRequestHandler,
