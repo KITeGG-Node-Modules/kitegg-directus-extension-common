@@ -44,7 +44,7 @@ function baseRequestHandler (requestFunction, context, allowGroups = [], propWhi
           return res.send({message: 'api_errors.forbidden'})
         }
 
-        const result = await requestFunction({req, res, next, client, user, userGroups})
+        const result = await requestFunction({req, res, next, client, user, userGroups, services})
         if (result) return res.send(result)
       } catch (err) {
         if (err.response) {
