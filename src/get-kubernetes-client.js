@@ -2,9 +2,7 @@ import * as k8s from '@kubernetes/client-node'
 
 let _client
 
-export function getKubernetesClient () {
-  if (_client) return _client
-
+export function getKubeConfig (namespace = undefined) {
   const kc = new k8s.KubeConfig()
   const cluster = {
     name: process.env.K8S_CLUSTER_NAME,
@@ -19,7 +17,7 @@ export function getKubernetesClient () {
     name: 'default',
     user: user.name,
     cluster: cluster.name,
-    namespace: process.env.K8S_NAMESPACE
+    namespace: namespace || process.env.K8S_NAMESPACE
   }
   kc.loadFromOptions({
     clusters: [cluster],
@@ -27,7 +25,13 @@ export function getKubernetesClient () {
     contexts: [context],
     currentContext: context.name
   })
+  return kc
+}
 
-  _client = kc.makeApiClient(k8s.CoreV1Api)
+export function getKubernetesClient (namespace = undefined, api = undefined) {
+  if (_client) return _client
+
+  const kc = getKubeConfig(namespace)
+  _client = kc.makeApiClient(api || k8s.CoreV1Api)
   return _client
 }
