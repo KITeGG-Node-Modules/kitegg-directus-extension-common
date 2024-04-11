@@ -1,6 +1,6 @@
 import * as k8s from '@kubernetes/client-node'
 
-let _client
+const _clients = {}
 
 export function getKubeConfig (namespace = undefined) {
   const kc = new k8s.KubeConfig()
@@ -28,10 +28,16 @@ export function getKubeConfig (namespace = undefined) {
   return kc
 }
 
-export function getKubernetesClient (namespace = undefined, api = undefined) {
-  if (_client) return _client
-
+export function getKubernetesClient (namespace = process.env.K8S_NAMESPACE, api = k8s.CoreV1Api) {
+  if (_clients[namespace]) {
+    if (_clients[namespace][api.name]) {
+      return _clients[namespace][api.name]
+    }
+  }
+  if (!_clients[namespace]) _clients[namespace] = {}
+  if (!_clients[namespace][api.name]) _clients[namespace][api.name] = {}
   const kc = getKubeConfig(namespace)
-  _client = kc.makeApiClient(api || k8s.CoreV1Api)
-  return _client
+  _clients[namespace][api.name] = kc.makeApiClient(api)
+
+  return _clients[namespace][api.name]
 }
