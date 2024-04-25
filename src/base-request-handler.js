@@ -48,7 +48,8 @@ function baseRequestHandler (requestFunction, context, allowGroups = [], propWhi
         if (result) return res.send(result)
       } catch (err) {
         if (err.response) {
-          res.status(err.response.status)
+          console.error('Base request error:', err.message, err.response.data)
+          res.status(err.response.status || 500)
           return res.send(err.response.data)
         }
         next(err)
