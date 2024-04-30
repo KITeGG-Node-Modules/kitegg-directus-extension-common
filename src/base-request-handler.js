@@ -22,17 +22,21 @@ function baseRequestHandler (requestFunction, context, allowGroups = [], propWhi
         let userGroups = [], isAllowed = false
         if (user?.external_identifier) {
           console.log('Keycloak: Fetch external user id', user.external_identifier);
-          ({data: userGroups} = await client.get(`/users/${user?.external_identifier}/groups`))
-          isAllowed = !allowGroups.length || !!userGroups.find(group => allowGroups.includes(group.name))
-          if (!isAllowed && user.external_identifier === req.params.id) {
-            if (propWhitelist.length) {
-              if (req.data) {
-                for (const key in req.data) {
-                  if (!propWhitelist.includes(key)) delete req.data[key]
+          try {
+            ({data: userGroups} = await client.get(`/users/${user?.external_identifier}/groups`))
+            isAllowed = !allowGroups.length || !!userGroups.find(group => allowGroups.includes(group.name))
+            if (!isAllowed && user.external_identifier === req.params.id) {
+              if (propWhitelist.length) {
+                if (req.data) {
+                  for (const key in req.data) {
+                    if (!propWhitelist.includes(key)) delete req.data[key]
+                  }
                 }
               }
+              isAllowed = true
             }
-            isAllowed = true
+          } catch (err) {
+            console.error('Failed to fetch Keycloak user:', err.message)
           }
         }
         if (req.accountability.admin) {
@@ -49,6 +53,9 @@ function baseRequestHandler (requestFunction, context, allowGroups = [], propWhi
       } catch (err) {
         if (err.response) {
           console.error('Base request error:', err.message, err.response.data)
+          if (!err.response.data) {
+            console.log('Base request error stack:', err.stack)
+          }
           res.status(err.response.status || 500)
           return res.send(err.response.data)
         }
