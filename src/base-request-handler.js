@@ -49,7 +49,7 @@ function baseRequestHandler (requestFunction, context, allowGroups = [], propWhi
         }
 
         const result = await requestFunction({req, res, next, client, user, userGroups, services})
-        if (result) return res.send(result)
+        if (typeof result !== 'undefined') return res.send(result)
       } catch (err) {
         if (err.response) {
           console.error('Base request error:', err.message, err.response.data)
